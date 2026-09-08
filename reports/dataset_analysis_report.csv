@@ -1,0 +1,5 @@
+dataset,rows,unique_classes,missing_text,empty_text,dup_texts,token_min,token_mean,token_p90,token_p95,token_p98,token_max,recommended_max_len,truncate_pct
+intent,20043,19,0,0,0,5,27.6,51.0,75.0,107.0,1226,128,1.15
+root_cause,11594,26,0,0,0,7,36.2,68.0,96.4,127.1,1226,256,1.16
+sentiment,16432,4,0,0,0,4,34.6,60.0,83.0,111.0,1226,128,1.41
+risk,11594,5,0,0,0,7,36.2,68.0,96.4,127.1,1226,256,1.16

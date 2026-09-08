@@ -1,0 +1,26 @@
+{
+    "intent": {
+        "max_length": 128,
+        "truncate_pct": 1.15,
+        "p95_token_length": 75.0,
+        "rationale": "At max_length=128, only 1.15% of reviews are truncated. p95 token length is 75."
+    },
+    "root_cause": {
+        "max_length": 256,
+        "truncate_pct": 1.16,
+        "p95_token_length": 96.4,
+        "rationale": "At max_length=256, only 1.16% of reviews are truncated. p95 token length is 96."
+    },
+    "sentiment": {
+        "max_length": 128,
+        "truncate_pct": 1.41,
+        "p95_token_length": 83.0,
+        "rationale": "At max_length=128, only 1.41% of reviews are truncated. p95 token length is 83."
+    },
+    "risk": {
+        "max_length": 256,
+        "truncate_pct": 1.16,
+        "p95_token_length": 96.4,
+        "rationale": "At max_length=256, only 1.16% of reviews are truncated. p95 token length is 96."
+    }
+}
