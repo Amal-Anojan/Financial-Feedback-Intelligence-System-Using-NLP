@@ -1,0 +1,707 @@
+{
+  "version": "review-taxonomy-v3",
+  "note": "Internal prioritization policy, not regulatory/legal requirements or validated financial risk. Labels require human audit.",
+  "sentiments": {
+    "positive": {
+      "code": "POS",
+      "description": "Customer expresses satisfaction, appreciation, or delight.",
+      "churn_risk": "LOW",
+      "review_signal": "Retention / NPS booster",
+      "default_action": "Archive for marketing reuse"
+    },
+    "neutral": {
+      "code": "NEU",
+      "description": "Informational, ambiguous, or no strong emotional valence.",
+      "churn_risk": "MEDIUM",
+      "review_signal": "Feature request or passive feedback",
+      "default_action": "Route to product backlog"
+    },
+    "negative": {
+      "code": "NEG",
+      "description": "Customer expresses dissatisfaction, frustration, or complaint.",
+      "churn_risk": "HIGH",
+      "review_signal": "Churn trigger / regulatory exposure",
+      "default_action": "Escalate within SLA"
+    },
+    "mixed": {
+      "code": "MIX",
+      "description": "Review contains both positive and negative signals.",
+      "churn_risk": "MEDIUM",
+      "review_signal": "Partial satisfaction — watch for escalation",
+      "default_action": "Flag for product and CX review"
+    }
+  },
+  "intents": {
+    "technical_failure": {
+      "code": "TECH",
+      "priority": "P1",
+      "sla_hours": 24,
+      "description": "App or backend technically broken: crashes, force-close, OTP not delivered, API/server error, notification failure, UI regression after update. Core functionality does not work.",
+      "action_owner": "Engineering + Customer Support",
+      "escalation_note": "Assign to on-call engineer. Check Sentry / crash dashboard.",
+      "v1_equivalent": "complaint (app/backend/OTP broken)"
+    },
+    "access_blocked": {
+      "code": "ACBL",
+      "priority": "P1",
+      "sla_hours": 24,
+      "description": "Customer cannot get into the app: login failure, biometric failure, password reset broken, device limit exceeded, KYC block, session expiry loop, developer-options restriction.",
+      "action_owner": "Engineering + Identity/Auth Team",
+      "escalation_note": "If KYC-related escalate to Compliance. Log device fingerprint.",
+      "v1_equivalent": "complaint (login/auth/device blocked)"
+    },
+    "payment_failure": {
+      "code": "PAYF",
+      "priority": "P1",
+      "sla_hours": 12,
+      "description": "A payment, transfer, top-up, QR, or bill payment initiated by the customer did not complete or shows in an error/stuck state. Includes LankaPay / CEFT / SLIPS rail failures and QR failures.",
+      "action_owner": "Engineering + Finance + Payments Team",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation.",
+      "v1_equivalent": "complaint (payment/api_failure)"
+    },
+    "data_integrity_issue": {
+      "code": "DATA",
+      "priority": "P1",
+      "sla_hours": 24,
+      "description": "Customer sees wrong balance, missing or duplicate transaction, incorrect statement, or data that does not match what the bank holds.",
+      "action_owner": "Engineering + Core Banking + Finance",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation.",
+      "v1_equivalent": "complaint (data_sync_issue)"
+    },
+    "service_quality": {
+      "code": "SVCQ",
+      "priority": "P2",
+      "sla_hours": 48,
+      "description": "App technically works but is slow, laggy, unresponsive, times out, or is painful to use due to performance degradation.",
+      "action_owner": "Engineering / DevOps",
+      "escalation_note": "Check infra metrics for same time window. Correlate with deploy events.",
+      "v1_equivalent": "complaint (slow) + performance_issue"
+    },
+    "support_failure": {
+      "code": "SUPF",
+      "priority": "P2",
+      "sla_hours": 48,
+      "description": "Customer explicitly says support ignored them, gave no reply, was unhelpful after multiple contacts, or the complaint channel itself is broken.",
+      "action_owner": "Head of Customer Experience + CRO",
+      "escalation_note": "Pattern of support failures is a regulatory risk. Flag to CRO if 3+ in same week.",
+      "v1_equivalent": "complaint (unresponsive_support)"
+    },
+    "interbank_transfer_failure": {
+      "code": "IBTF",
+      "priority": "P1",
+      "sla_hours": 12,
+      "description": "Transfer to another Sri Lankan bank failed or is stuck — specifically LankaPay, CEFT, SLIPS, or RTGS rail. Distinct from internal transfers within the same bank.",
+      "action_owner": "Payments Team + LankaPay Liaison + Engineering",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation.",
+      "v1_equivalent": "NEW — was previously lost inside complaint/api_failure"
+    },
+    "agent_banking_issue": {
+      "code": "AGNT",
+      "priority": "P2",
+      "sla_hours": 48,
+      "description": "Problem related to agent banking: field agent not available, agent gave wrong information, agent machine down, Sampath Vishwa / BOC agent network failure, or mismatch between agent record and app record.",
+      "action_owner": "Agent Network Operations + Regional Manager",
+      "escalation_note": "Rural customers disproportionately affected. Escalate if cluster of reports from same region.",
+      "v1_equivalent": "NEW — previously undetected, fell into noise or general complaint"
+    },
+    "fx_conversion_complaint": {
+      "code": "FXCC",
+      "priority": "P2",
+      "sla_hours": 48,
+      "description": "Complaint about forex rate, remittance, foreign currency conversion, or multi-currency wallet. Includes diaspora remittance to Sri Lanka and disagreement on exchange rate applied.",
+      "action_owner": "Treasury + Finance + Compliance",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation.",
+      "v1_equivalent": "NEW — previously fell into refund_request or noise"
+    },
+    "ux_friction": {
+      "code": "UXFR",
+      "priority": "P2",
+      "sla_hours": 72,
+      "description": "Usability or flow friction — app works but is hard to use, confusing, or poorly designed.",
+      "action_owner": "UX + Product",
+      "escalation_note": "Group by screen/flow for sprint planning."
+    },
+    "refund_request": {
+      "code": "RFND",
+      "priority": "P1",
+      "sla_hours": 24,
+      "description": "Customer asks for refund, reversal, or money back.",
+      "action_owner": "Finance + Customer Support",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation."
+    },
+    "security_concern": {
+      "code": "SECU",
+      "priority": "P0",
+      "sla_hours": 4,
+      "description": "Reported credential compromise, unauthorized access or unauthorized transactions; prioritize over refund or closure requests when an incident is also reported.",
+      "action_owner": "CISO + CRO",
+      "escalation_note": "Immediate CRO notification required."
+    },
+    "regulatory_risk": {
+      "code": "REGU",
+      "priority": "P0",
+      "sla_hours": 4,
+      "description": "Explicit compliance/legal concern requiring review. An ordinary login or KYC problem is not proof of a regulatory violation.",
+      "action_owner": "Legal + CRO",
+      "escalation_note": "Must be logged before end of business day."
+    },
+    "complaint": {
+      "code": "CMPL",
+      "priority": "P1",
+      "sla_hours": 24,
+      "description": "Broken feature, failed transaction, or blocked access.",
+      "action_owner": "Engineering + Customer Support",
+      "escalation_note": "Assign to on-call engineer if P0 root cause."
+    },
+    "churn_signal": {
+      "code": "CHRN",
+      "priority": "P1",
+      "sla_hours": 12,
+      "description": "Customer threatens to leave or switch provider.",
+      "action_owner": "Retention Team + Head of Product",
+      "escalation_note": "Trigger win-back flow within SLA."
+    },
+    "competitor_switch": {
+      "code": "CPSW",
+      "priority": "P1",
+      "sla_hours": 12,
+      "description": "Customer explicitly states they are moving to a named competitor.",
+      "action_owner": "Retention Team + Marketing",
+      "escalation_note": "Log competitor name in competitive intelligence tracker."
+    },
+    "account_closure": {
+      "code": "ACLO",
+      "priority": "P1",
+      "sla_hours": 12,
+      "description": "Explicit request to close/deactivate an account. Mentioning an account or password is not closure. Security incidents take priority.",
+      "action_owner": "Retention Team + Compliance",
+      "escalation_note": "Internal triage guidance only. Compliance determines any reporting duties after investigation."
+    },
+    "feature_request": {
+      "code": "FREQ",
+      "priority": "P3",
+      "sla_hours": 168,
+      "description": "Customer requests a new capability or improvement.",
+      "action_owner": "Product Management",
+      "escalation_note": "Tag with feature area for roadmap clustering."
+    },
+    "praise": {
+      "code": "PRAI",
+      "priority": "P4",
+      "sla_hours": null,
+      "description": "Positive experience or endorsement — no action needed.",
+      "action_owner": "Marketing / CX",
+      "escalation_note": "Extract for NPS and testimonials."
+    },
+    "noise": {
+      "code": "NOIS",
+      "priority": "P5",
+      "sla_hours": null,
+      "description": "Gibberish, spam, off-topic, or unreadable text.",
+      "action_owner": "Data Engineering",
+      "escalation_note": "Exclude from ML training set."
+    }
+  },
+  "root_causes": {
+    "authentication_failure": {
+      "domain": "Access Control",
+      "cro_flag": true,
+      "description": "Login failure, password reset failure, or session expires repeatedly. Does NOT cover biometric (see biometric_failure) or OTP issues (see notification_delivery_failure / otp_loop_failure).",
+      "review_example": "Cannot log in even with correct password"
+    },
+    "biometric_failure": {
+      "domain": "Access Control",
+      "cro_flag": true,
+      "description": "Fingerprint or face ID does not work in the app — either refuses to scan, loops, or reverts to PIN without explanation. Split from authentication_failure for precise routing to mobile security team.",
+      "review_example": "Fingerprint won't work, keeps asking for PIN",
+      "v1_equivalent": "NEW — previously lumped into authentication_failure"
+    },
+    "device_limit_exceeded": {
+      "domain": "Access Control",
+      "cro_flag": true,
+      "description": "Blocked by registered-device limit or device policy.",
+      "review_example": "Exceeded maximum device registrations"
+    },
+    "notification_delivery_failure": {
+      "domain": "Platform Reliability",
+      "cro_flag": true,
+      "description": "OTP or verification SMS is never received at all — does not arrive even after retries. Distinct from otp_loop_failure where OTP arrives but is rejected.",
+      "review_example": "I never receive the OTP SMS"
+    },
+    "otp_loop_failure": {
+      "domain": "Platform Reliability",
+      "cro_flag": true,
+      "description": "OTP arrives correctly but the app rejects it, calls it expired immediately, or loops the OTP screen endlessly. Different from notification_delivery_failure (OTP not received).",
+      "review_example": "OTP comes but app says invalid / expired immediately",
+      "v1_equivalent": "NEW — previously lumped into notification_delivery_failure"
+    },
+    "slow_performance": {
+      "domain": "Platform Reliability",
+      "cro_flag": false,
+      "description": "App speed, latency, timeout, or lag problems — app still works.",
+      "review_example": "App takes 30 seconds to load"
+    },
+    "app_crash_or_bug": {
+      "domain": "Platform Reliability",
+      "cro_flag": false,
+      "description": "App crashes, freezes, or has a persistent UI bug — NOT caused by a recent update. If the crash started after an update use app_update_regression.",
+      "review_example": "App crashes every time I open it"
+    },
+    "app_update_regression": {
+      "domain": "Platform Reliability",
+      "cro_flag": true,
+      "description": "App worked before but broke after a specific version update. Signals a regression introduced by the release team. CRO flag true because mass regressions generate surge in negative reviews and may affect CBS integration.",
+      "review_example": "After the latest update the app won't open at all",
+      "v1_equivalent": "NEW — split from app_crash_or_bug for release management routing"
+    },
+    "api_failure": {
+      "domain": "Backend / Integration",
+      "cro_flag": true,
+      "description": "Internal API call fails, backend endpoint errors, or service unavailable — for transfers or payments within the same bank's system.",
+      "review_example": "Payment fails with 'server error' on internal transfer"
+    },
+    "lankapay_ceft_failure": {
+      "domain": "Interbank Settlement",
+      "cro_flag": true,
+      "description": "Transfer via LankaPay, CEFT, or SLIPS rail fails or gets stuck. Distinct from api_failure (internal) — this involves the national payment infrastructure. Requires internal investigation; Compliance determines reporting duties.",
+      "review_example": "Transfer to Sampath Bank never arrived — deducted from my account",
+      "v1_equivalent": "NEW — previously classified as api_failure, losing CBSL escalation signal"
+    },
+    "qr_payment_failure": {
+      "domain": "Payments",
+      "cro_flag": true,
+      "description": "Lanka QR or in-app QR code scan payment fails — QR does not scan, payment does not process after scan, or merchant does not receive funds.",
+      "review_example": "QR code payment failed at the supermarket — was embarrassing",
+      "v1_equivalent": "NEW — previously lost in api_failure or app_crash_or_bug"
+    },
+    "data_sync_issue": {
+      "domain": "Backend / Data",
+      "cro_flag": true,
+      "description": "Balances, transactions, or records do not sync or display correctly.",
+      "review_example": "My balance shows wrong amount after transfer"
+    },
+    "security_restriction_ux": {
+      "domain": "Security Policy",
+      "cro_flag": true,
+      "description": "Legitimate security control causes access friction or user block.",
+      "review_example": "Have to turn off developer options just to open the app"
+    },
+    "poor_security_implementation": {
+      "domain": "Security Engineering",
+      "cro_flag": true,
+      "description": "Weak, broken, or band-aid security identified by customer.",
+      "review_example": "Their fix just breaks USB debugging — not real security"
+    },
+    "regulatory_block": {
+      "domain": "Compliance / Regulation",
+      "cro_flag": true,
+      "description": "Issue caused by compliance rules, KYC, or regulatory checks — and the customer KNOWS the reason (e.g. 'my KYC failed'). If customer says account frozen with NO reason given, use account_freeze_no_reason instead.",
+      "review_example": "The app says my KYC verification failed"
+    },
+    "account_freeze_no_reason": {
+      "domain": "Compliance / Trust",
+      "cro_flag": true,
+      "description": "Customer reports a frozen, blocked or restricted account with no communicated explanation. The cause and any reporting obligations require investigation.",
+      "review_example": "Account blocked without any reason or notice — can't access my money",
+      "v1_equivalent": "NEW — previously misclassified as authentication_failure or regulatory_block"
+    },
+    "unjustified_billing": {
+      "domain": "Revenue / Trust",
+      "cro_flag": true,
+      "description": "Unexpected charge, fee dispute, or billing complaint (general).",
+      "review_example": "Charged annual fee for an app that doesn't work"
+    },
+    "fee_without_service": {
+      "domain": "Revenue / Trust",
+      "cro_flag": true,
+      "description": "Customer reports a fee for a service that failed or was not delivered. Investigate the transaction before deciding on a refund.",
+      "review_example": "Charged Rs.50 transaction fee but the transfer failed",
+      "v1_equivalent": "NEW — previously lost inside unjustified_billing"
+    },
+    "misleading_promotion": {
+      "domain": "Marketing / Trust",
+      "cro_flag": true,
+      "description": "Customer reports an advertised offer or cashback was not honored. Verify terms and events before determining whether advertising was misleading.",
+      "review_example": "Promised 10% cashback but only got 2% — nowhere does it say that limit",
+      "v1_equivalent": "NEW — previously fell into feature_request or general_satisfaction"
+    },
+    "agent_network_failure": {
+      "domain": "Agent Banking",
+      "cro_flag": false,
+      "description": "Field agent unavailable, agent machine/terminal down, agent gave incorrect information, or mismatch between agent record and app record. Relevant to Sampath Vishwa, BOC Mobile Banking, and other agent networks.",
+      "review_example": "Agent in my area is never available — nearest one is 10km away",
+      "v1_equivalent": "NEW — previously fell into noise or general complaint"
+    },
+    "fx_rate_dispute": {
+      "domain": "Treasury / FX",
+      "cro_flag": true,
+      "description": "Customer disputes the forex rate applied, remittance conversion, or multi-currency wallet rate. Relevant for diaspora inward remittances and foreign card transactions processed in Sri Lanka.",
+      "review_example": "Applied a terrible exchange rate on my remittance — lost Rs.5000",
+      "v1_equivalent": "NEW — previously fell into refund_request or noise"
+    },
+    "unresponsive_support": {
+      "domain": "Customer Experience",
+      "cro_flag": false,
+      "description": "Support is slow, ignored, unhelpful, or unresponsive.",
+      "review_example": "Contacted support 5 times — no response"
+    },
+    "competitor_reference": {
+      "domain": "Competitive Intelligence",
+      "cro_flag": true,
+      "description": "Customer explicitly names or recommends a competing app or bank.",
+      "review_example": "HNB app is much better — switching to them"
+    },
+    "offer_discoverability": {
+      "domain": "Product Value",
+      "cro_flag": false,
+      "description": "Customer appreciates easy access to offers or useful features.",
+      "review_example": "I can now find offers easily"
+    },
+    "financial_safety_confidence": {
+      "domain": "Trust & Safety",
+      "cro_flag": false,
+      "description": "Customer explicitly trusts the app for safe financial transactions.",
+      "review_example": "Always keeps checking — feels very safe"
+    },
+    "general_satisfaction": {
+      "domain": "Brand Perception",
+      "cro_flag": false,
+      "description": "Overall positive experience without a specific feature driver.",
+      "review_example": "Best banking app in Sri Lanka"
+    },
+    "unreadable_text": {
+      "domain": "Data Quality",
+      "cro_flag": false,
+      "description": "Review is gibberish, emoji-only, random characters, or spam.",
+      "review_example": "aasdfghjkl 😂😂😂"
+    },
+    "other": {
+      "domain": "Unclassified",
+      "cro_flag": false,
+      "description": "Does not fit any defined root cause — use sparingly.",
+      "review_example": "Edge case not covered by taxonomy"
+    },
+    "suspected_account_compromise": {
+      "domain": "Security",
+      "cro_flag": true,
+      "description": "Customer reports leaked credentials or unauthorized account access. Reported symptom, not a verified technical cause."
+    },
+    "suspected_unauthorized_transaction": {
+      "domain": "Fraud operations",
+      "cro_flag": true,
+      "description": "Customer reports a payment, withdrawal or transfer they did not authorize. Must be investigated; do not infer a software vulnerability."
+    }
+  },
+  "intent_risk_defaults": {
+    "technical_failure": 5,
+    "access_blocked": 5,
+    "payment_failure": 5,
+    "data_integrity_issue": 5,
+    "service_quality": 5,
+    "support_failure": 5,
+    "interbank_transfer_failure": 5,
+    "agent_banking_issue": 5,
+    "fx_conversion_complaint": 5,
+    "ux_friction": 3,
+    "refund_request": 5,
+    "security_concern": 8,
+    "regulatory_risk": 6,
+    "complaint": 5,
+    "churn_signal": 5,
+    "competitor_switch": 5,
+    "account_closure": 6,
+    "feature_request": 3,
+    "praise": 1,
+    "noise": 0
+  },
+  "risk_matrix": [
+    {
+      "intent": "access_blocked",
+      "root_cause": "account_freeze_no_reason",
+      "score": 6
+    },
+    {
+      "intent": "access_blocked",
+      "root_cause": "authentication_failure",
+      "score": 5
+    },
+    {
+      "intent": "access_blocked",
+      "root_cause": "biometric_failure",
+      "score": 5
+    },
+    {
+      "intent": "access_blocked",
+      "root_cause": "device_limit_exceeded",
+      "score": 5
+    },
+    {
+      "intent": "access_blocked",
+      "root_cause": "otp_loop_failure",
+      "score": 5
+    },
+    {
+      "intent": "access_blocked",
+      "root_cause": "regulatory_block",
+      "score": 6
+    },
+    {
+      "intent": "account_closure",
+      "root_cause": "competitor_reference",
+      "score": 8
+    },
+    {
+      "intent": "agent_banking_issue",
+      "root_cause": "agent_network_failure",
+      "score": 6
+    },
+    {
+      "intent": "churn_signal",
+      "root_cause": "competitor_reference",
+      "score": 8
+    },
+    {
+      "intent": "competitor_switch",
+      "root_cause": "competitor_reference",
+      "score": 8
+    },
+    {
+      "intent": "data_integrity_issue",
+      "root_cause": "data_sync_issue",
+      "score": 8
+    },
+    {
+      "intent": "data_integrity_issue",
+      "root_cause": "lankapay_ceft_failure",
+      "score": 8
+    },
+    {
+      "intent": "feature_request",
+      "root_cause": "app_update_regression",
+      "score": 4
+    },
+    {
+      "intent": "feature_request",
+      "root_cause": "offer_discoverability",
+      "score": 3
+    },
+    {
+      "intent": "feature_request",
+      "root_cause": "slow_performance",
+      "score": 3
+    },
+    {
+      "intent": "fx_conversion_complaint",
+      "root_cause": "fx_rate_dispute",
+      "score": 7
+    },
+    {
+      "intent": "interbank_transfer_failure",
+      "root_cause": "lankapay_ceft_failure",
+      "score": 8
+    },
+    {
+      "intent": "noise",
+      "root_cause": "unreadable_text",
+      "score": 0
+    },
+    {
+      "intent": "payment_failure",
+      "root_cause": "api_failure",
+      "score": 8
+    },
+    {
+      "intent": "payment_failure",
+      "root_cause": "fee_without_service",
+      "score": 8
+    },
+    {
+      "intent": "payment_failure",
+      "root_cause": "lankapay_ceft_failure",
+      "score": 8
+    },
+    {
+      "intent": "payment_failure",
+      "root_cause": "qr_payment_failure",
+      "score": 8
+    },
+    {
+      "intent": "praise",
+      "root_cause": "financial_safety_confidence",
+      "score": 1
+    },
+    {
+      "intent": "praise",
+      "root_cause": "general_satisfaction",
+      "score": 1
+    },
+    {
+      "intent": "praise",
+      "root_cause": "offer_discoverability",
+      "score": 1
+    },
+    {
+      "intent": "refund_request",
+      "root_cause": "fee_without_service",
+      "score": 8
+    },
+    {
+      "intent": "refund_request",
+      "root_cause": "unjustified_billing",
+      "score": 8
+    },
+    {
+      "intent": "regulatory_risk",
+      "root_cause": "account_freeze_no_reason",
+      "score": 6
+    },
+    {
+      "intent": "regulatory_risk",
+      "root_cause": "fee_without_service",
+      "score": 8
+    },
+    {
+      "intent": "regulatory_risk",
+      "root_cause": "misleading_promotion",
+      "score": 8
+    },
+    {
+      "intent": "regulatory_risk",
+      "root_cause": "regulatory_block",
+      "score": 6
+    },
+    {
+      "intent": "regulatory_risk",
+      "root_cause": "unjustified_billing",
+      "score": 8
+    },
+    {
+      "intent": "security_concern",
+      "root_cause": "poor_security_implementation",
+      "score": 7
+    },
+    {
+      "intent": "security_concern",
+      "root_cause": "regulatory_block",
+      "score": 6
+    },
+    {
+      "intent": "security_concern",
+      "root_cause": "security_restriction_ux",
+      "score": 4
+    },
+    {
+      "intent": "security_concern",
+      "root_cause": "suspected_account_compromise",
+      "score": 9
+    },
+    {
+      "intent": "security_concern",
+      "root_cause": "suspected_unauthorized_transaction",
+      "score": 10
+    },
+    {
+      "intent": "service_quality",
+      "root_cause": "slow_performance",
+      "score": 5
+    },
+    {
+      "intent": "support_failure",
+      "root_cause": "unresponsive_support",
+      "score": 6
+    },
+    {
+      "intent": "technical_failure",
+      "root_cause": "api_failure",
+      "score": 8
+    },
+    {
+      "intent": "technical_failure",
+      "root_cause": "app_crash_or_bug",
+      "score": 5
+    },
+    {
+      "intent": "technical_failure",
+      "root_cause": "app_update_regression",
+      "score": 7
+    },
+    {
+      "intent": "technical_failure",
+      "root_cause": "notification_delivery_failure",
+      "score": 5
+    },
+    {
+      "intent": "technical_failure",
+      "root_cause": "otp_loop_failure",
+      "score": 5
+    },
+    {
+      "intent": "ux_friction",
+      "root_cause": "app_update_regression",
+      "score": 6
+    },
+    {
+      "intent": "ux_friction",
+      "root_cause": "offer_discoverability",
+      "score": 3
+    },
+    {
+      "intent": "ux_friction",
+      "root_cause": "security_restriction_ux",
+      "score": 4
+    },
+    {
+      "intent": "ux_friction",
+      "root_cause": "slow_performance",
+      "score": 4
+    }
+  ],
+  "risk_bands": [
+    {
+      "min": 0,
+      "max": 2,
+      "band": "NEGLIGIBLE",
+      "action": "Archive / marketing use"
+    },
+    {
+      "min": 3,
+      "max": 4,
+      "band": "LOW",
+      "action": "Backlog — next sprint"
+    },
+    {
+      "min": 5,
+      "max": 6,
+      "band": "MODERATE",
+      "action": "Assign to Product team this week"
+    },
+    {
+      "min": 7,
+      "max": 8,
+      "band": "HIGH",
+      "action": "Escalate to Head of Product within 24h"
+    },
+    {
+      "min": 9,
+      "max": 10,
+      "band": "CRITICAL",
+      "action": "Immediate CRO + Legal escalation"
+    }
+  ],
+  "security_triage": {
+    "credential_risk_floor": 9.0,
+    "unauthorized_transaction_risk_floor": 10.0,
+    "note": "Provisional internal priorities, not calibrated scores; validate with company incident data."
+  },
+  "risk_score_method": {
+    "name": "expected_band_midpoint",
+    "representatives": {
+      "NEGLIGIBLE": 1,
+      "LOW": 3.5,
+      "MODERATE": 5.5,
+      "HIGH": 7.5,
+      "CRITICAL": 9.5
+    },
+    "note": "Ordinal band display conversion; not a regression model or probability of loss."
+  }
+}

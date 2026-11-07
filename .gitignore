@@ -1,7 +1,22 @@
+# Secrets and local environments
 api_keys.json
-.venv
-.vscode
-/_pycache_
-data
-models
-reports
+database.toml
+transformer_models.json
+.env
+.venv/
+venv/
+__pycache__/
+.pytest_cache/
+.pytest_tmp*/
+.ipynb_checkpoints/
+.vscode/
+runtime/
+# Private/raw data and generated experiment artifacts
+data/**
+!data/README.md
+reports/**
+!reports/README.md
+models/**
+!models/README.md
+# Publish only verified complete exports explicitly with git add -f and Git LFS.
+*.log

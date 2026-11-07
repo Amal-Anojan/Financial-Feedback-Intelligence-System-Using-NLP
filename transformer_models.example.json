@@ -1,0 +1,10 @@
+{
+  "device": "cpu",
+  "risk_score_method": "expected_band_midpoint",
+  "exports": {
+    "sentiment": "models/transformer_exports/sentiment/REPLACE_WITH_EXPORT_FOLDER",
+    "intent": "models/transformer_exports/intent/REPLACE_WITH_EXPORT_FOLDER",
+    "root_cause": "models/transformer_exports/root_cause/REPLACE_WITH_EXPORT_FOLDER",
+    "risk": "models/transformer_exports/risk/REPLACE_WITH_EXPORT_FOLDER"
+  }
+}

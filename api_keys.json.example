@@ -1,0 +1,4 @@
+{
+  "groq_keys": ["PASTE_YOUR_GROQ_KEY"],
+  "gemini_keys": ["PASTE_YOUR_GEMINI_KEY"]
+}

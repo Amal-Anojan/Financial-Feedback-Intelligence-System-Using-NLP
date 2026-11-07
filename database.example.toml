@@ -1,0 +1,9 @@
+# Copy this file to database.toml, which is excluded from Git.
+# With no database.toml the app uses runtime/reviews.sqlite3 for local testing.
+[database]
+backend = "mysql"
+host = "127.0.0.1"
+port = 3306
+name = "finsentiment"
+user = "finsentiment_app"
+password = "REPLACE_WITH_YOUR_PASSWORD"
