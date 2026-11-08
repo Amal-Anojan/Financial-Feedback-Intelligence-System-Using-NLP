@@ -6,6 +6,6 @@ Keep: all numbered research stages included here, taxonomy, training_quality, ru
 
 Archive: old *_best/checkpoint folders with unverifiable mappings, old tokenized datasets and older evaluations. They are not deployment inputs. Delete only disposable caches after verifying their paths. Do not delete the actual MySQL database, runtime SQLite results, raw reviews or the only copy of an experiment.
 
-Excluded from this transformer-only publication: train_web_models.py, web_baseline.joblib, classical inference code, notebook 9, baseline evaluation reports, old broad handbooks describing baseline behavior, credentials, actual review data, cached/generated artifacts and incomplete transformer checkpoints.
+Excluded from this transformer-only publication: train_web_models.py, web_baseline.joblib, classical inference code, the classical-baseline notebook, baseline evaluation reports, old broad handbooks describing baseline behavior, credentials, actual review data, cached/generated artifacts and incomplete transformer checkpoints.
 
 Model readiness remains blocked on relabeling/auditing and training in a suitable environment. Fixing the training workflow does not magically repair existing weights. Once all four exports pass review, publish those artifacts with LFS or a versioned model release and update the model-selection example to actual release paths.

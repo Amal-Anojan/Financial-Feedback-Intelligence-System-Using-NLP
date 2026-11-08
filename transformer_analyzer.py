@@ -1,4 +1,4 @@
-"""Inference adapter for validated exports from notebook 10. Imports torch lazily."""
+"""Inference adapter for validated exports from notebook 8. Imports torch lazily."""
 import hashlib
 import json
 import math

@@ -176,7 +176,7 @@ Start Jupyter from the project root:
 python -m jupyterlab
 ```
 
-Select the **FinSentiment** kernel. Run each required notebook from top to bottom, completing one stage before starting the next. Follow the sequence below; gaps in filenames do not indicate missing required steps.
+Select the **FinSentiment** kernel. Run each required notebook from top to bottom, completing one stage before starting the next. Follow the consecutive file sequence from 1 to 8 below. Step 1 is a Python script; steps 2–8 are notebooks.
 
 | Step | File or activity | What it does | Result needed by the next stage |
 |---:|---|---|---|
@@ -184,11 +184,11 @@ Select the **FinSentiment** kernel. Run each required notebook from top to botto
 | 2 | `2_scraper.ipynb` | Collects the configured app reviews | Raw app CSVs and combined reviews |
 | 3 | `3_data_audit_clean.ipynb` | Audits and cleans the input datasets | Clean CSVs in `data/processed/` |
 | 4 | `4_Taxonomy_and_Labeling.ipynb` | Labels reviews using `taxonomy.json` and the configured provider | `data/labeled/labeled_reviews_v3.csv` |
-| 5 | Review the generated labels | Check and correct a representative sample, including security reports, negations and mixed issues | Reviewed labels suitable for training |
-| 6 | `5_mapping_audit_datasets.ipynb` | Maps labels, builds task datasets and records exclusions/provenance | Task CSVs and `dataset_manifest.json` in `data/model_ready/` |
-| 7, optional | `7_dataset_analysis.ipynb` | Examines class balance and text/token lengths | Descriptive reports in `reports/` |
-| 8 | `8_tokenization.ipynb` | Cleans task data, creates separate splits and saves tokenized inputs | Task datasets, tokenizers and manifests in `data/tokenized/` |
-| 9 | `10_transformer_training.ipynb` | Trains, evaluates and exports all four models | Complete exports in `models/transformer_exports/` |
+| After step 4 | Review the generated labels | Check and correct a representative sample, including security reports, negations and mixed issues | Reviewed labels suitable for training |
+| 5 | `5_mapping_audit_datasets.ipynb` | Maps labels, builds task datasets and records exclusions/provenance | Task CSVs and `dataset_manifest.json` in `data/model_ready/` |
+| 6, optional | `6_dataset_analysis.ipynb` | Examines class balance and text/token lengths | Descriptive reports in `reports/` |
+| 7 | `7_tokenization.ipynb` | Cleans task data, creates separate splits and saves tokenized inputs | Task datasets, tokenizers and manifests in `data/tokenized/` |
+| 8 | `8_transformer_training.ipynb` | Trains, evaluates and exports all four models | Complete exports in `models/transformer_exports/` |
 
 Important data-quality behavior:
 
@@ -201,11 +201,11 @@ Important data-quality behavior:
 
 Review the exclusion reports: a model cannot learn a category that has been excluded. Collect more independently reviewed examples for important undersupported categories. Ten examples is a split safeguard, not a guarantee of good performance.
 
-Restart the kernel before a complete rerun. Notebook 8 replaces its generated tokenized folders, so preserve an experiment's artifacts before rebuilding them.
+Restart the kernel before a complete rerun. Notebook 7 replaces its generated tokenized folders, so preserve an experiment's artifacts before rebuilding them.
 
 ## 4. Train and evaluate the models
 
-In `10_transformer_training.ipynb`:
+In `8_transformer_training.ipynb`:
 
 1. Run the setup and configuration cells.
 2. Review epochs, learning rate and batch size. Reduce the batch size if memory is insufficient.
@@ -413,7 +413,7 @@ Keep credentials, customer data and database files private. Keep a backup of the
 | Notebook 3 cannot find a CSV | Complete data acquisition and check its explicit input paths against your files |
 | Labeling cannot authenticate | Check the private `api_keys.json`, usable provider keys and notebook provider/model settings |
 | A class has too few examples | Inspect the exclusion report; collect more distinct reviewed examples if the category is important |
-| CUDA out of memory during training | Reduce the training/evaluation batch size in notebook 10; train one task at a time |
+| CUDA out of memory during training | Reduce the training/evaluation batch size in notebook 8; train one task at a time |
 | Transformer setup is incomplete | Complete all four exports and edit `transformer_models.json`; run preflight |
 | `evaluation.json` is missing | Run that task's evaluation cell after its training cell |
 | Model, taxonomy or data hashes differ | Use matching artifacts or rebuild the affected stages; do not bypass validation |
